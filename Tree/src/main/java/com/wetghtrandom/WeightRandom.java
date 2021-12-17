@@ -6,6 +6,12 @@ import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
+/**
+ * WeightRandom
+ *
+ * @author Administrator
+ * @date 2021-12-17 09:21
+ */
 public class WeightRandom<K,V extends Number> {
 
     private final TreeMap<Double, K> weightMap = new TreeMap<>();

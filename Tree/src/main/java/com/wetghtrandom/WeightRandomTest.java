@@ -9,6 +9,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * WeightRandomTest
+ *
+ * @author Administrator
+ * @date 2021-12-17 09:21
+ */
 public class WeightRandomTest {
 
     List<Pair<String, Integer>> list;
