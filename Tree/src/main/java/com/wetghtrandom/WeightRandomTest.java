@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.IntStream;
 
 /**
  * WeightRandomTest
@@ -23,10 +24,10 @@ public class WeightRandomTest {
     public void random() {
         Map<String, Integer> countMap = new HashMap<>(6);
         int num = 100000000;
-        for (int i = 0; i < num; i++) {
+        IntStream.range(0,num).forEach(i -> {
             String randomKey = random.random();
             countMap.put(randomKey, countMap.getOrDefault(randomKey, 0) + 1);
-        }
+        });
 
         list.forEach(stringIntegerPair -> {
             String key = stringIntegerPair.getKey();

@@ -17,11 +17,11 @@ public class WeightRandom<K,V extends Number> {
     private final TreeMap<Double, K> weightMap = new TreeMap<>();
 
     public WeightRandom(List<Pair<K, V>> list) {
-        for (Pair<K, V> pair : list) {
+        list.forEach(kvPair -> {
             double lastWeight = weightMap.size() == 0 ? 0 : weightMap.lastKey();
             // 权重累加
-            weightMap.put(pair.getValue().doubleValue() + lastWeight, pair.getKey());
-        }
+            weightMap.put(kvPair.getValue().doubleValue() + lastWeight, kvPair.getKey());
+        });
     }
 
     public K random() {
