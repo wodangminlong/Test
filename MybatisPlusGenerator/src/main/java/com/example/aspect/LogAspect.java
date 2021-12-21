@@ -1,8 +1,12 @@
 package com.example.aspect;
 
-import cn.hutool.http.useragent.Browser;
-import cn.hutool.http.useragent.UserAgent;
 import com.alibaba.fastjson.JSON;
+import com.example.entity.SystemLog;
+import com.example.service.SystemLogService;
+import com.example.util.IpUtils;
+import eu.bitwalker.useragentutils.Browser;
+import eu.bitwalker.useragentutils.OperatingSystem;
+import eu.bitwalker.useragentutils.UserAgent;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -21,6 +25,12 @@ import java.lang.reflect.Method;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
+/**
+ * LogAspect
+ *
+ * @author Administrator
+ * @date 2021-12-21 15:29
+ */
 @Slf4j
 @Aspect
 @Component
@@ -28,11 +38,11 @@ public class LogAspect {
 
     ThreadLocal<Long> currentTime = new ThreadLocal<>();
 
-//    private final SystemLogService systemLogService;
-//
-//    public LogAspect(SystemLogService systemLogService) {
-//        this.systemLogService = systemLogService;
-//    }
+    private final SystemLogService systemLogService;
+
+    public LogAspect(SystemLogService systemLogService) {
+        this.systemLogService = systemLogService;
+    }
 
     @Pointcut("@annotation(Log)")
     public void logPointcut() {
@@ -44,9 +54,9 @@ public class LogAspect {
         Object result;
         currentTime.set(System.currentTimeMillis());
         result = pjp.proceed();
-//        SystemLog systemLog = getSystemLog(pjp, "");
+        SystemLog systemLog = getSystemLog(pjp, "");
         currentTime.remove();
-//        systemLogService.addLog(systemLog);
+        systemLogService.addLog(systemLog);
         return result;
     }
 
@@ -59,35 +69,35 @@ public class LogAspect {
     @AfterThrowing(pointcut = "logPointcut()", throwing = "e")
     public void logAfterThrowing(JoinPoint joinPoint, Throwable e) {
         ProceedingJoinPoint pjp = (ProceedingJoinPoint)joinPoint;
-//        SystemLog systemLog = getSystemLog(pjp, e.getMessage());
+        SystemLog systemLog = getSystemLog(pjp, e.getMessage());
         currentTime.remove();
-//        systemLogService.addLog(systemLog);
+        systemLogService.addLog(systemLog);
     }
 
-//    private SystemLog getSystemLog(ProceedingJoinPoint pjp, String e) {
-//        SystemLog systemLog = new SystemLog();
-//        MethodSignature signature = (MethodSignature) pjp.getSignature();
-//        Method method = signature.getMethod();
-//        Log l = method.getAnnotation(Log.class);
-//        HttpServletRequest request = getHttpServletRequest();
-//        String ip = IpUtils.getIpAddress(request);
-//        String address = getAddress(ip);
-//        String browser = getBrowser(request);
-//        String systemName = getSystemName(request);
-//        systemLog.setRemark(l.value())
-//                .setLogType(getLogLevel())
-//                .setMethod(pjp.getTarget().getClass().getName()+"."+signature.getName())
-//                .setParams(JSON.toJSONString(pjp.getArgs()))
-//                .setRequestIp(ip)
-//                .setDuration(System.currentTimeMillis() - currentTime.get())
-//                .setUsername("admin")
-//                .setAddress(address)
-//                .setBrowser(browser)
-//                .setSystemName(systemName)
-//                .setError(e)
-//                .setCreateTime(LocalDateTime.now());
-//        return systemLog;
-//    }
+    private SystemLog getSystemLog(ProceedingJoinPoint pjp, String e) {
+        SystemLog systemLog = new SystemLog();
+        MethodSignature signature = (MethodSignature) pjp.getSignature();
+        Method method = signature.getMethod();
+        Log l = method.getAnnotation(Log.class);
+        HttpServletRequest request = getHttpServletRequest();
+        String ip = IpUtils.getIpAddress(request);
+        String address = getAddress(ip);
+        String browser = getBrowser(request);
+        String systemName = getSystemName(request);
+        systemLog.setRemark(l.value())
+                .setLogType(getLogLevel())
+                .setMethod(pjp.getTarget().getClass().getName()+"."+signature.getName())
+                .setParams(JSON.toJSONString(pjp.getArgs()))
+                .setRequestIp(ip)
+                .setDuration(System.currentTimeMillis() - currentTime.get())
+                .setUsername("admin")
+                .setAddress(address)
+                .setBrowser(browser)
+                .setSystemName(systemName)
+                .setError(e)
+                .setCreateTime(LocalDateTime.now());
+        return systemLog;
+    }
 
     private HttpServletRequest getHttpServletRequest() {
         return ((ServletRequestAttributes) Objects.requireNonNull(RequestContextHolder.getRequestAttributes())).getRequest();
@@ -113,16 +123,16 @@ public class LogAspect {
         return JSON.parseObject(result).getString("addr");
     }
 
-//    private String getBrowser(HttpServletRequest request) {
-//        UserAgent userAgent = UserAgent.parseUserAgentString(request.getHeader("User-Agent"));
-//        Browser browser = userAgent.getBrowser();
-//        return browser.getName();
-//    }
-//
-//    private String getSystemName(HttpServletRequest request) {
-//        UserAgent userAgent = UserAgent.parseUserAgentString(request.getHeader("User-Agent"));
-//        OperatingSystem operatingSystem = userAgent.getOperatingSystem();
-//        return operatingSystem.getName();
-//    }
+    private String getBrowser(HttpServletRequest request) {
+        UserAgent userAgent = UserAgent.parseUserAgentString(request.getHeader("User-Agent"));
+        Browser browser = userAgent.getBrowser();
+        return browser.getName();
+    }
+
+    private String getSystemName(HttpServletRequest request) {
+        UserAgent userAgent = UserAgent.parseUserAgentString(request.getHeader("User-Agent"));
+        OperatingSystem operatingSystem = userAgent.getOperatingSystem();
+        return operatingSystem.getName();
+    }
 
 }
