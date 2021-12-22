@@ -4,6 +4,8 @@ import com.example.aspect.Log;
 import com.example.exception.ExceptionAdvice;
 import com.example.util.ApiResponse;
 import com.example.util.PageModule;
+import com.yomahub.liteflow.core.FlowExecutor;
+import com.yomahub.liteflow.entity.data.Slot;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -26,6 +28,9 @@ public class TestController extends ExceptionAdvice {
     @Resource
     private TestService testService;
 
+    @Resource
+    private FlowExecutor flowExecutor;
+
     /**
      * 查询分页数据
      *
@@ -34,8 +39,9 @@ public class TestController extends ExceptionAdvice {
      */
     @Log("查询Test列表数据")
     @PostMapping("listGetTestByPage")
-    public ApiResponse listGetTestByPage(@Validated PageModule pageModule) {
-        return testService.listGetTestByPage(pageModule);
+    public ApiResponse listGetTestByPage(@Validated PageModule pageModule) throws Exception {
+        Slot slot = flowExecutor.execute("listGetTestByPage", pageModule);
+        return slot.getResponseData();
     }
 
     /**

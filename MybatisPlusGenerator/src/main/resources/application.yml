@@ -6,6 +6,15 @@ spring:
       username: test
       password: test
 
+
 logging:
   level:
     com.example: debug
+
+liteflow:
+  rule-source: config/flow.xml
+  slot-size: 2048
+  when-max-wait-seconds: 10
+  monitor:
+    enable-log: true
+    queue-limit: 300

@@ -30,7 +30,7 @@ public class TestServiceImpl extends ServiceImpl<TestMapper, Test> implements Te
     public ApiResponse listGetTestByPage(PageModule pageModule) {
         QueryWrapper<Test> queryWrapper = new QueryWrapper<>();
         if (StringUtils.isNotEmpty(pageModule.getSearch())) {
-            queryWrapper.like("", pageModule.getSearch());
+            queryWrapper.like("name", pageModule.getSearch());
         }
         IPage<Test> wherePage = new Page<>(pageModule.getPageNo(), pageModule.getPageSize());
         IPage<Test> iPage = testMapper.selectPage(wherePage, queryWrapper);
