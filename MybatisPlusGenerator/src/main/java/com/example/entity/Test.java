@@ -4,27 +4,25 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
+import lombok.experimental.Accessors;
 
 /**
- * <p>
- * 
- * </p>
+ * Test
  *
  * @author dml
- * @since 2021-12-20
+ * @date 2021-12-22
  */
-@Getter
-@Setter
+@Data
+@Accessors(chain = true)
 @TableName("tb_test")
 public class Test {
 
-    @TableId(value = "id", type = IdType.AUTO)
-    private Integer id;
+   @TableId(value = "id", type = IdType.AUTO)
+   private Integer id;
 
-    @TableField("name")
-    private String name;
+   @TableField("name")
+   private String name;
 
 
 }

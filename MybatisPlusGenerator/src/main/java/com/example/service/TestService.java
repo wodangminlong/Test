@@ -6,12 +6,12 @@ import com.example.util.ApiResponse;
 import com.example.util.PageModule;
 
 /**
- * ITestService
+ * TestService
  *
  * @author dml
- * @date 2021-12-20
+ * @date 2021-12-22
  */
-public interface ITestService extends IService<Test> {
+public interface TestService extends IService<Test> {
 
     /**
      * 查询分页数据

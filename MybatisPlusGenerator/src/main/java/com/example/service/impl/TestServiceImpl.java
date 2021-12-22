@@ -3,7 +3,7 @@ package com.example.service.impl;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.example.entity.Test;
 import com.example.mapper.TestMapper;
-import com.example.service.ITestService;
+import com.example.service.TestService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.util.ApiResponse;
 import com.example.util.PageModule;
@@ -18,10 +18,10 @@ import javax.annotation.Resource;
  * TestServiceImpl
  *
  * @author dml
- * @date 2021-12-20
+ * @date 2021-12-22
  */
 @Service
-public class TestServiceImpl extends ServiceImpl<TestMapper, Test> implements ITestService {
+public class TestServiceImpl extends ServiceImpl<TestMapper, Test> implements TestService {
 
     @Resource
     private TestMapper testMapper;
