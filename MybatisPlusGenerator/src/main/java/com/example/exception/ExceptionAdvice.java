@@ -3,12 +3,21 @@ package com.example.exception;
 import com.example.util.ApiErrorCode;
 import com.example.util.ApiResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.TypeMismatchException;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.util.CollectionUtils;
+import org.springframework.validation.BindException;
+import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
+import org.springframework.validation.ObjectError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.bind.support.WebExchangeBindException;
+import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
@@ -23,41 +32,61 @@ import java.util.Set;
  */
 @Slf4j
 @RestControllerAdvice
-public class ExceptionAdvice {
+public class ExceptionAdvice extends ResponseEntityExceptionHandler {
 
-    @ExceptionHandler(WebExchangeBindException.class)
-    @ResponseStatus(code = HttpStatus.BAD_REQUEST)
-    public ApiResponse handleWebExchangeBindException(WebExchangeBindException e) {
-        List<FieldError> violations = e.getFieldErrors();
-        StringBuilder strBuilder = new StringBuilder();
-        for (FieldError fieldError : violations) {
-            strBuilder.append(fieldError.getField()).append(" ").append(fieldError.getDefaultMessage()).append(";");
-        }
-        String result = strBuilder.toString();
-        log.error("ExceptionAdvice handleWebExchangeBindException: {}", result);
-        return ApiResponse.error(ApiErrorCode.PARAMETER_ERROR, result);
-    }
-
-    @ExceptionHandler(ConstraintViolationException.class)
-    @ResponseStatus(code = HttpStatus.BAD_REQUEST)
-    public ApiResponse handleConstraintViolationException(ConstraintViolationException e) {
+    @ExceptionHandler(value = { ConstraintViolationException.class })
+    public ApiResponse handle(ConstraintViolationException e) {
         Set<ConstraintViolation<?>> violations = e.getConstraintViolations();
         StringBuilder strBuilder = new StringBuilder();
         for (ConstraintViolation<?> violation : violations) {
             strBuilder.append(violation.getPropertyPath()).append(" ").append(violation.getMessage()).append(";");
         }
         String result = strBuilder.toString();
-        log.error("ExceptionAdvice handleConstraintViolationException: {}", result);
+        log.error("ExceptionAdvice handle has error:" + result);
         return ApiResponse.error(ApiErrorCode.PARAMETER_ERROR, result);
     }
 
-    @ExceptionHandler(Exception.class)
-    @ResponseStatus(code = HttpStatus.INTERNAL_SERVER_ERROR)
-    public ApiResponse handleCustomException(Exception e) {
-        log.error("handleCustomException: ", e.fillInStackTrace());
-        return ApiResponse.error();
+    @Override
+    protected ResponseEntity<Object> handleBindException(BindException ex, HttpHeaders headers, HttpStatus status,
+                                                         WebRequest request) {
+        return new ResponseEntity<>(buildMessages(ex.getBindingResult()),
+                HttpStatus.BAD_REQUEST);
     }
 
+    @Override
+    protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex, HttpHeaders headers,
+                                                                  HttpStatus status, WebRequest request) {
+        return new ResponseEntity<>(buildMessages(ex.getBindingResult()),
+                HttpStatus.BAD_REQUEST);
+    }
 
+    @Override
+    public ResponseEntity<Object> handleMissingServletRequestParameter(MissingServletRequestParameterException ex,
+                                                                       HttpHeaders headers, HttpStatus status,
+                                                                       WebRequest request) {
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
+    @Override
+    protected ResponseEntity<Object> handleTypeMismatch(TypeMismatchException ex, HttpHeaders headers,
+                                                        HttpStatus status, WebRequest request) {
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
+    private ApiResponse buildMessages(BindingResult result) {
+        StringBuilder resultBuilder = new StringBuilder();
+        List<ObjectError> errors = result.getAllErrors();
+        if (!CollectionUtils.isEmpty(errors)) {
+            for (ObjectError error : errors) {
+                if (error instanceof FieldError) {
+                    FieldError fieldError = (FieldError) error;
+                    String fieldErrMsg = fieldError.getDefaultMessage();
+                    resultBuilder.append(fieldErrMsg);
+                    break;
+                }
+            }
+        }
+        return ApiResponse.error(ApiErrorCode.PARAMETER_ERROR, resultBuilder.toString());
+    }
 
 }
